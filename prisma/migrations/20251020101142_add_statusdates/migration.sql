@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Order" ADD COLUMN     "statusDates" JSONB NOT NULL DEFAULT '{}',
+ALTER COLUMN "services" SET DEFAULT ARRAY[]::TEXT[],
+ALTER COLUMN "products" SET DEFAULT ARRAY[]::TEXT[];

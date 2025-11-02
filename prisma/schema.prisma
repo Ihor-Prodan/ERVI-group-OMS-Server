@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String @id @default(uuid())
+  email    String
+  password String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Order {
+  id              String   @id @default(uuid())
+  date            DateTime @default(now())
+  deliveryNumber  String
+  status          String
+  statusDates     Json     @default("{}")
+  company         String
+  street          String
+  psc             String
+  city            String
+  country         String
+  email           String
+  phone           String
+  pickupType      String
+  pickupDate      DateTime?
+  services        String[] @default([])
+  gdpr            Boolean
+  deliveryNote    String
+  contractNumber  String
+  products        String[] @default([])
+  weight          String
+  from            String
+  fullname        String
+  receiverStreet  String
+  receiverPsc     String
+  receiverCity    String
+  receiverCountry String
+  receiverPhone   String
+  receiverEmail   String
+  to              String
+  route           String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
