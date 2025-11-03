@@ -28,6 +28,7 @@
     "pdfkit": "^0.17.2",
     "prisma": "^6.17.1",
     "puppeteer": "^24.23.0",
+    "resend": "^6.4.0",
     "stream-buffers": "^3.0.3",
     "uuid": "^13.0.0"
   },
