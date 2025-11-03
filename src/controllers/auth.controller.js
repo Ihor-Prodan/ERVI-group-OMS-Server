@@ -28,14 +28,14 @@ export const login = async (req, res) => {
   res.cookie(COOKIE_NAME, accessToken, {
     httpOnly: true,
     secure: isProd,
-    sameSite: "strict",
+    sameSite: "none",
     maxAge: 1000 * 60 * 60 * 2,
   });
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: isProd,
-    sameSite: "strict",
+    sameSite: "none",
     maxAge: 1000 * 60 * 60 * 24 * 3,
   });
 
