@@ -63,14 +63,14 @@ export const refresh = async (req, res) => {
   res.cookie(COOKIE_NAME, newAccessToken, {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? "none" : "strict",
+    sameSite: "none",
     maxAge: 1000 * 60 * 60 * 2,
   });
 
   res.cookie("refreshToken", newRefreshToken, {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? "none" : "strict",
+    sameSite: "none",
     maxAge: 1000 * 60 * 60 * 24 * 3,
   });
 
