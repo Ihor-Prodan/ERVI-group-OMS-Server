@@ -77,11 +77,26 @@ export const refresh = async (req, res) => {
   res.json({ ok: true });
 };
 
+// export const logout = (req, res) => {
+//   res.clearCookie(COOKIE_NAME);
+//   res.clearCookie("refreshToken");
+//   res.json({ ok: true });
+// };
+
 export const logout = (req, res) => {
-  res.clearCookie(COOKIE_NAME);
-  res.clearCookie("refreshToken");
+  const cookieOptions = {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: "none",
+    path: "/",
+  };
+
+  res.clearCookie(COOKIE_NAME, cookieOptions);
+  res.clearCookie("refreshToken", cookieOptions);
+
   res.json({ ok: true });
 };
+
 
 export const changePassword = async (req, res) => {
   const user = req.user;
