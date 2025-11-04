@@ -1,0 +1,29 @@
+# ERVI Group server
+
+**Backend service** for managing and tracking delivery orders.  
+Built with **Node.js + Express + Prisma**, this API handles everything from **order creation** to **email notifications** and **PDF invoice generation**.
+
+---
+
+## Features
+
+- **Authentication & Authorization** – JWT (Access + Refresh tokens)
+- **Order Management** – create, update, and list delivery orders
+- **Email Notifications** – powered by [Resend](https://resend.com)
+- **PDF Generation** – dynamic delivery documents / invoices
+- **Route detection** – based on receiver’s country
+- **Environment-aware deployment** – Railway / Render / Vercel ready
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-------------|
+| **Runtime** | Node.js |
+| **Framework** | Express |
+| **Database ORM** | Prisma |
+| **Email Provider** | Resend API |
+| **Auth Tokens** | JWT (Access + Refresh) |
+| **PDF Engine** | pdfkit / pdf-lib |
+| **Deployment** | Railway |

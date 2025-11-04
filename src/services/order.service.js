@@ -209,7 +209,7 @@ export const updateOrderStatus = async (id, status, date = null) => {
         attachments: [
           {
             filename: `objednavka-${existingOrder.deliveryNumber}.pdf`,
-            content: pdfBuffer,
+            content: pdfBuffer.toString("base64"),
           },
         ],
       });
@@ -230,7 +230,7 @@ export const updateOrderStatus = async (id, status, date = null) => {
         attachments: [
           {
             filename: `objednavka-${existingOrder.deliveryNumber}.pdf`,
-            content: pdfBuffer,
+            content: pdfBuffer.toString("base64"),
           },
         ],
       });
