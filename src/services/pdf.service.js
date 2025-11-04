@@ -1,15 +1,24 @@
 import puppeteer from "puppeteer";
 
-export const generateOrderPdfBuffer = async (order) => {
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  });
+let browser;
 
+const getBrowser = async () => {
+  if (!browser) {
+    browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
+  }
+  return browser;
+};
+
+export const generateOrderPdfBuffer = async (order) => {
+  const browser = await getBrowser();
   const page = await browser.newPage();
 
-  await page.setContent(
-    `
+  try {
+    await page.setContent(
+       `
       <html>
         <head>
           <style>
@@ -392,15 +401,25 @@ export const generateOrderPdfBuffer = async (order) => {
         </body>
       </html>
     `,
-    { waitUntil: "networkidle0" }
-  );
+      { waitUntil: "networkidle0" }
+    );
 
-  const pdfBuffer = await page.pdf({
-    format: "A4",
-    printBackground: true,
-    margin: { top: "15px", bottom: "5px", left: "15px", right: "15px" },
-  });
+    const pdfBuffer = await page.pdf({
+      format: "A4",
+      printBackground: true,
+      margin: { top: "15px", bottom: "5px", left: "15px", right: "15px" },
+    });
 
-  await browser.close();
-  return pdfBuffer;
+    return pdfBuffer;
+  } finally {
+    await page.close();
+  }
 };
+
+process.on("SIGTERM", async () => {
+  if (browser) {
+    await browser.close();
+    console.log("🧹 Puppeteer browser closed on shutdown");
+  }
+  process.exit(0);
+});
