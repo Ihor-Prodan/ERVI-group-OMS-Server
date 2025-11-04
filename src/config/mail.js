@@ -23,3 +23,4 @@ export const sendOrderEmail = async ({
     console.error('❌ Chyba pri odosielaní emailu cez Resend:', err);
   }
 };
+

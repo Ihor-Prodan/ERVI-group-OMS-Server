@@ -187,8 +187,8 @@ export const updateOrderStatus = async (id, status, date = null) => {
     }
 
     if (status === "delivered") {
-      const pdfBuffer = await generateOrderPdfBuffer(existingOrder);
-      const base64Pdf = Buffer.from(pdfBuffer).toString("base64");
+      let pdfBuffer = await generateOrderPdfBuffer(existingOrder);
+      let base64Pdf = Buffer.from(pdfBuffer).toString("base64");
 
       await sendOrderEmail({
         to: existingOrder.receiverEmail,
@@ -231,6 +231,9 @@ export const updateOrderStatus = async (id, status, date = null) => {
           },
         ],
       });
+
+      pdfBuffer = null;
+      base64Pdf = null;
     }
   } catch (err) {
     console.error("Chyba pri odosielaní e-mailu:", err);
