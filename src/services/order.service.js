@@ -106,16 +106,12 @@ export const createOrder = async (payload) => {
       subject: `Nová objednávka - číslo ${order.deliveryNumber}`,
       text: `
         Dobrý deň,
-
         Bola prijatá nová objednávka číslo #${order.deliveryNumber}
         Prosím, skontrolujte jej detaily v systéme a pripravte ju na spracovanie.
-
         Zákazník: ${order.company || "Neznámy"}
         Dátum vytvorenia: ${now.toLocaleDateString("sk-SK")}
-
         Podrobnosti nájdete po prihlásení do administrácie:
         https://www.ervi-group.com/#/admin/new
-
         Váš systém objednávok ERVI Group
       `.trim(),
     });
@@ -162,12 +158,12 @@ export const updateOrderStatus = async (id, status, date = null) => {
     },
   });
 
-  let newEmail = '';
+  let newEmail = "";
 
   if (existingOrder.company === "Miele spol. s.r.o. (CZ)") {
-    newEmail = 'obchod@miele.cz';
+    newEmail = "obchod@miele.cz";
   } else if (existingOrder.company === "Miele s.r.o. (SK)") {
-    newEmail = 'obchod@miele.sk';
+    newEmail = "obchod@miele.sk";
   } else {
     newEmail = existingOrder.email;
   }
@@ -180,7 +176,7 @@ export const updateOrderStatus = async (id, status, date = null) => {
         text: `
             Dobrý deň,
 
-            Vaša objednávka číslo ${existingOrder.deliveryNumber} 
+            Vaša objednávka číslo ${existingOrder.deliveryNumber}
             bude odoslaná dňa ${updateTime.toLocaleDateString("sk-SK")}.
             Aktuálny stav objednávky môžete sledovať tu:
             https://www.ervi-group.com/#/tracking?number=${
@@ -192,6 +188,7 @@ export const updateOrderStatus = async (id, status, date = null) => {
 
     if (status === "delivered") {
       const pdfBuffer = await generateOrderPdfBuffer(existingOrder);
+      const base64Pdf = Buffer.from(pdfBuffer).toString("base64");
 
       await sendOrderEmail({
         to: existingOrder.receiverEmail,
@@ -209,8 +206,7 @@ export const updateOrderStatus = async (id, status, date = null) => {
         attachments: [
           {
             filename: `objednavka-${existingOrder.deliveryNumber}.pdf`,
-            content: pdfBuffer.toString("base64"),
-            type: "application/pdf",
+            content: base64Pdf,
           },
         ],
       });
@@ -231,8 +227,7 @@ export const updateOrderStatus = async (id, status, date = null) => {
         attachments: [
           {
             filename: `objednavka-${existingOrder.deliveryNumber}.pdf`,
-            content: pdfBuffer.toString("base64"),
-            type: "application/pdf",
+            content: base64Pdf,
           },
         ],
       });
