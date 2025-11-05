@@ -77,12 +77,6 @@ export const refresh = async (req, res) => {
   res.json({ ok: true });
 };
 
-// export const logout = (req, res) => {
-//   res.clearCookie(COOKIE_NAME);
-//   res.clearCookie("refreshToken");
-//   res.json({ ok: true });
-// };
-
 export const logout = (req, res) => {
   const cookieOptions = {
     httpOnly: true,

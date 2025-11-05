@@ -26,6 +26,7 @@ export const createOrder = async (payload) => {
       cesko: "CZ",
       česko: "CZ",
       ceskarepublika: "CZ",
+      českarepublika: "CZ",
       czechia: "CZ",
       poland: "PL",
       austria: "AT",
@@ -75,7 +76,7 @@ export const createOrder = async (payload) => {
       country: payload.country || "",
       email: payload.email || "",
       phone: payload.phone || "",
-      pickupType: payload.pickupType || null,
+      pickupType: payload.pickupType || '',
       pickupDate: pickupDate,
       services: payload.services || [],
       gdpr: payload.gdpr || false,
@@ -113,6 +114,29 @@ export const createOrder = async (payload) => {
         Podrobnosti nájdete po prihlásení do administrácie:
         https://www.ervi-group.com/#/admin/new
         Váš systém objednávok ERVI Group
+      `.trim(),
+    });
+
+    await sendOrderEmail({
+      to: order.email,
+      subject: `Vaša objednávka bola úspešne prijatá - číslo #${order.deliveryNumber}`,
+      text: `
+        Dobrý deň,
+
+        Vaša objednávka číslo DL ${
+          order.contractNumber
+        } bola úspešne prijatá dňa ${now.toLocaleDateString("sk-SK")}.
+        Čoskoro vás budeme informovať o ďalšom stave objednávky.
+
+        Sledovanie objednávky:
+        https://www.ervi-group.com/#/tracking?number=${order.deliveryNumber}
+
+        Tu môžete kedykoľvek skontrolovať aktuálny stav vašej objednávky pri pomoci čísla ${
+          order.deliveryNumber
+        }.
+
+        S pozdravom,
+        ERVI Group
       `.trim(),
     });
   } catch (err) {
@@ -171,7 +195,7 @@ export const updateOrderStatus = async (id, status, date = null) => {
   try {
     if (status === "sent") {
       await sendOrderEmail({
-        to: newEmail,
+        to: existingOrder.email,
         subject: `Vaša objednávka ${existingOrder.deliveryNumber} bude odoslaná`,
         text: `
             Dobrý deň,
