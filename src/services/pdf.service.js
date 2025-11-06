@@ -76,6 +76,7 @@ export const generateOrderPdfBuffer = async (order) => {
                 border: 1px solid #ccc;
                 padding: 4px 6px;
                 line-height: 1.2;
+                 text-align: center;
               }
 
               .doc-header th {
@@ -85,6 +86,7 @@ export const generateOrderPdfBuffer = async (order) => {
 
               .section {
                 margin-bottom: 10px;
+                margin-top: 30px;
                 page-break-inside: avoid;
               }
 
@@ -160,6 +162,7 @@ export const generateOrderPdfBuffer = async (order) => {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
+                margin-top: 30px;
               }
 
               .footer-container {
@@ -194,11 +197,11 @@ export const generateOrderPdfBuffer = async (order) => {
                 text-decoration: underline;
               }
             </style>
-          </head>
+        </head>
 
-          <body>
-            <div style="height: 100%;">
-                <div class="header-top">
+        <body>
+          <div style="height: 100%;">
+            <div class="header-top">
                   <div class="logo">
                     <svg
                       version="1.0"
@@ -273,10 +276,16 @@ export const generateOrderPdfBuffer = async (order) => {
                   </div>
                   <div class="doc-info">
                     <div>
-                      <strong>Dátum dodania:</strong> ${new Date( order.date ).toLocaleDateString("sk-SK")}
+                      <strong>Dátum dodania:</strong> ${new Date(
+                        order.date
+                      ).toLocaleDateString("sk-SK")}
                     </div>
-                      <div><strong>Číslo zásielky:</strong> ${order.deliveryNumber}</div>
-                      <div><strong>Číslo DL:</strong> ${order.contractNumber}</div>
+                      <div><strong>Číslo zásielky:</strong> ${
+                        order.deliveryNumber
+                      }</div>
+                      <div><strong>Číslo DL:</strong> ${
+                        order.contractNumber
+                      }</div>
                   </div>
                 </div>
 
@@ -290,9 +299,20 @@ export const generateOrderPdfBuffer = async (order) => {
                   </tr>
                   <tr>
                   <td>
-                    ${ order.statusDates?.sent ? new Date(order.statusDates.sent).toLocaleString("sk-SK", {
-                    day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit",
-                    }) : "-" }
+                    ${
+                      order.statusDates?.sent
+                        ? new Date(order.statusDates.sent).toLocaleString(
+                            "sk-SK",
+                            {
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )
+                        : "-"
+                    }
                   </td>
                   <td>${order.route || "SK"}</td>
                   <td>${order.weight || 0} kg</td>
@@ -334,7 +354,9 @@ export const generateOrderPdfBuffer = async (order) => {
                         <td>${order.receiverStreet || "-"}</td>
                       </tr>
                       <tr>
-                        <td>${order.receiverPsc || "-"} ${ order.receiverCity || "-" }</td>
+                        <td>${order.receiverPsc || "-"} ${
+        order.receiverCity || "-"
+      }</td>
                       </tr>
                       <tr>
                         <td>${order.receiverCountry || "-"}</td>
@@ -349,9 +371,13 @@ export const generateOrderPdfBuffer = async (order) => {
                   </div>
                 </div>
 
-                ${ order.deliveryNote ? `
+                ${
+                  order.deliveryNote
+                    ? `
                 <div class="note"><strong>Poznámka:</strong> ${order.deliveryNote}</div>
-                ` : "" }
+                `
+                    : ""
+                }
 
                 <div class="section">
                   <h3>Produkty</h3>
@@ -364,22 +390,31 @@ export const generateOrderPdfBuffer = async (order) => {
                       </tr>
                     </thead>
                     <tbody>
-                      ${order.products .map( (p) => `
+                      ${order.products
+                        .map(
+                          (p) => `
                       <tr>
                         <td>${p.quantity || 1}</td>
                         <td>${p.unit || "ks"}</td>
                         <td>${typeof p === "string" ? p : p.name}</td>
                       </tr>
-                    ` ) .join("")}
+                    `
+                        )
+                        .join("")}
                     </tbody>
                   </table>
 
-                   ${ order.services?.length ? `
-                  <div class="services"><strong>Služby:</strong> ${order.services.join( ", " )}</div>
-                  ` : "" }
+                   ${
+                     order.services?.length
+                       ? `
+                  <div class="services"><strong>Služby:</strong> ${order.services.join(
+                    ", "
+                  )}</div>
+                  `
+                       : ""
+                   }
                 </div>
               </div>
-
           </div>
 
           <div class="footer-container">
@@ -397,7 +432,7 @@ export const generateOrderPdfBuffer = async (order) => {
                 IČO: 56829175 &nbsp;|&nbsp; IČ DPH: SK2122463442 &nbsp;|&nbsp; OR MS Bratislava, oddiel
                 s.r.o., vložka č. 186048/B
               </div>
-            </div>
+          </div>
         </body>
       </html>
     `,

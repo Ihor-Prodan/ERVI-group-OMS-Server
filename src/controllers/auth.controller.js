@@ -28,14 +28,14 @@ export const login = async (req, res) => {
   res.cookie(COOKIE_NAME, accessToken, {
     httpOnly: true,
     secure: isProd,
-    sameSite: "none",
+    sameSite: isProd ? "none" : 'lax',
     maxAge: 1000 * 60 * 60 * 2,
   });
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: isProd,
-    sameSite: "none",
+    sameSite: isProd ? "none" : 'lax',
     maxAge: 1000 * 60 * 60 * 24 * 3,
   });
 
@@ -63,14 +63,14 @@ export const refresh = async (req, res) => {
   res.cookie(COOKIE_NAME, newAccessToken, {
     httpOnly: true,
     secure: isProd,
-    sameSite: "none",
+    sameSite: isProd ? "none" : 'lax',
     maxAge: 1000 * 60 * 60 * 2,
   });
 
   res.cookie("refreshToken", newRefreshToken, {
     httpOnly: true,
     secure: isProd,
-    sameSite: "none",
+    sameSite: isProd ? "none" : 'lax',
     maxAge: 1000 * 60 * 60 * 24 * 3,
   });
 
@@ -81,7 +81,7 @@ export const logout = (req, res) => {
   const cookieOptions = {
     httpOnly: true,
     secure: isProd,
-    sameSite: "none",
+    sameSite: isProd ? "none" : 'lax',
     path: "/",
   };
 
