@@ -39,7 +39,7 @@ export const generateOrderPdfBuffer = async (order) => {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                border-bottom: 1px solid #dcdcdc;
+                border-bottom: 1px solid #000;
                 padding-bottom: 6px;
                 margin-bottom: 10px;
               }
@@ -73,7 +73,7 @@ export const generateOrderPdfBuffer = async (order) => {
 
               .doc-header th,
               .doc-header td {
-                border: 1px solid #ccc;
+                border: 1px solid #000;
                 padding: 4px 6px;
                 line-height: 1.2;
                  text-align: center;
@@ -93,7 +93,7 @@ export const generateOrderPdfBuffer = async (order) => {
               .section h3 {
                 font-size: 11px;
                 text-transform: uppercase;
-                border-bottom: 1px solid #ddd;
+                border-bottom: 1px solid #000;
                 padding-bottom: 2px;
                 margin-bottom: 3px;
                 color: #333;
@@ -113,30 +113,23 @@ export const generateOrderPdfBuffer = async (order) => {
                 width: 100%;
                 border-collapse: collapse;
                 margin-top: 5px;
-                font-size: 11px;
+                font-size: 14px;
+                table-layout: fixed;
               }
 
               .products th,
               .products td {
-                border: 1px solid #ccc;
-                padding: 3px 5px;
-                line-height: 1.2;
-              }
-
-              .products th {
-                background: #f7f7f7;
-                text-align: left;
-                position: sticky;
-                top: 0;
-              }
-
-              .products tr {
-                page-break-inside: avoid;
+                border: 1px solid #000;
+                padding: 3px 4px;
+                line-height: 1;
+                text-align: center;
+                vertical-align: top;
+                box-sizing: border-box;
               }
 
               .note {
                 background: #f9f9f9;
-                border-left: 3px solid #0074d9;
+                border-left: 3px solid #000;
                 padding: 6px 8px;
                 font-size: 10px;
                 margin: 8px 0;
@@ -175,7 +168,7 @@ export const generateOrderPdfBuffer = async (order) => {
                 font-size: 9px;
                 display: flex;
                 align-items: center;
-                border-top: 1px solid #ccc;
+                border-top: 1px solid #000;
                 padding: 6px 10px;
                 background: white;
               }
@@ -307,8 +300,6 @@ export const generateOrderPdfBuffer = async (order) => {
                               day: "2-digit",
                               month: "2-digit",
                               year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
                             }
                           )
                         : "-"

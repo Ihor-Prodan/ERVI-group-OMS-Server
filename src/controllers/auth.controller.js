@@ -29,6 +29,8 @@ export const login = async (req, res) => {
     httpOnly: true,
     secure: isProd,
     sameSite: isProd ? "none" : 'lax',
+    domain: ".ervi-group.com",
+    path: "/",
     maxAge: 1000 * 60 * 60 * 2,
   });
 
@@ -36,6 +38,8 @@ export const login = async (req, res) => {
     httpOnly: true,
     secure: isProd,
     sameSite: isProd ? "none" : 'lax',
+    domain: ".ervi-group.com",
+    path: "/",
     maxAge: 1000 * 60 * 60 * 24 * 3,
   });
 
@@ -64,6 +68,8 @@ export const refresh = async (req, res) => {
     httpOnly: true,
     secure: isProd,
     sameSite: isProd ? "none" : 'lax',
+    domain: ".ervi-group.com",
+    path: "/",
     maxAge: 1000 * 60 * 60 * 2,
   });
 
@@ -71,6 +77,8 @@ export const refresh = async (req, res) => {
     httpOnly: true,
     secure: isProd,
     sameSite: isProd ? "none" : 'lax',
+    domain: ".ervi-group.com",
+    path: "/",
     maxAge: 1000 * 60 * 60 * 24 * 3,
   });
 
@@ -83,6 +91,7 @@ export const logout = (req, res) => {
     secure: isProd,
     sameSite: isProd ? "none" : 'lax',
     path: "/",
+    domain: ".ervi-group.com",
   };
 
   res.clearCookie(COOKIE_NAME, cookieOptions);

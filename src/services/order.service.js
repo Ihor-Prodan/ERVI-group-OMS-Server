@@ -4,6 +4,28 @@ import { sendOrderEmail } from "../config/mail.js";
 import { generateOrderPdfBuffer } from "../services/pdf.service.js";
 
 export const createOrder = async (payload) => {
+  const requiredFields = [
+    "company",
+    "fullname",
+    "receiverStreet",
+    "receiverPsc",
+    "receiverCity",
+    "receiverCountry",
+    "receiverPhone",
+    "receiverEmail",
+    "products",
+  ];
+
+  const missingFields = requiredFields.filter((field) => {
+    if (field === "products")
+      return !payload.products || payload.products.length === 0;
+    return !payload[field] || payload[field].toString().trim() === "";
+  });
+
+  if (missingFields.length > 0) {
+    throw new Error(`Chýbajú tieto povinné polia: ${missingFields.join(", ")}`);
+  }
+
   const now = new Date();
 
   const generateOrderNumber = async () => {
@@ -76,7 +98,7 @@ export const createOrder = async (payload) => {
       country: payload.country || "",
       email: payload.email || "",
       phone: payload.phone || "",
-      pickupType: payload.pickupType || '',
+      pickupType: payload.pickupType || "",
       pickupDate: pickupDate,
       services: payload.services || [],
       gdpr: payload.gdpr || false,
