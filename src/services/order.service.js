@@ -38,29 +38,6 @@ export const createOrder = async (payload) => {
     return nextNumber.toString().padStart(5, "0");
   };
 
-  const getRouteFromCountry = (country) => {
-    if (!country) return "SK";
-
-    const map = {
-      slovensko: "SK",
-      slovakia: "SK",
-      slovenskarepublika: "SK",
-      cesko: "CZ",
-      česko: "CZ",
-      ceskarepublika: "CZ",
-      českarepublika: "CZ",
-      czechia: "CZ",
-      poland: "PL",
-      austria: "AT",
-      hungary: "HU",
-      germany: "DE",
-      ukraine: "UA",
-    };
-
-    const normalized = country.trim().toLowerCase();
-    return map[normalized] || "SK";
-  };
-
   const COMPANY_OPTIONS = [
     { value: "1", label: "Miele s.r.o. (SK)" },
     { value: "5", label: "Miele spol. s.r.o. (CZ)" },
@@ -69,7 +46,14 @@ export const createOrder = async (payload) => {
     { value: "6", label: "Ine..." },
   ];
 
+  const COUNTRY_OPTIONS = [
+    { label: "Slovenská republika", value: "SK" },
+    { label: "Česká republika", value: "CZ" },
+  ];
+
   const company = COMPANY_OPTIONS.find((c) => c.value === payload.company);
+  const country = COUNTRY_OPTIONS.find((c) => c.value === payload.country);
+  const receiverCountry = COUNTRY_OPTIONS.find((c) => c.value === payload.receiverCountry);
 
   const pickupDate =
     payload.pickupType === "asap"
@@ -95,7 +79,7 @@ export const createOrder = async (payload) => {
       street: payload.street || "",
       psc: payload.psc || "",
       city: payload.city || "",
-      country: payload.country || "",
+      country: country.label || "-",
       email: payload.email || "",
       phone: payload.phone || "",
       pickupType: payload.pickupType || "",
@@ -111,11 +95,11 @@ export const createOrder = async (payload) => {
       receiverStreet: payload.receiverStreet || "",
       receiverPsc: payload.receiverPsc || "",
       receiverCity: payload.receiverCity || "",
-      receiverCountry: payload.receiverCountry || "",
+      receiverCountry: receiverCountry.label || "-",
       receiverPhone: payload.receiverPhone || "",
       receiverEmail: payload.receiverEmail || "",
       to: payload.to || "",
-      route: getRouteFromCountry(payload.receiverCountry),
+      route: payload.receiverCountry || "-",
     },
   });
 
@@ -215,23 +199,6 @@ export const updateOrderStatus = async (id, status, date = null) => {
   }
 
   try {
-    if (status === "sent") {
-      await sendOrderEmail({
-        to: existingOrder.email,
-        subject: `Vaša objednávka ${existingOrder.deliveryNumber} bude odoslaná`,
-        text: `
-            Dobrý deň,
-
-            Vaša objednávka číslo ${existingOrder.deliveryNumber}
-            bude odoslaná dňa ${updateTime.toLocaleDateString("sk-SK")}.
-            Aktuálny stav objednávky môžete sledovať tu:
-            https://www.ervi-group.com/#/tracking?number=${
-              existingOrder.deliveryNumber
-            } alebo na našej webovej stránke, zadaním čísla objednávky.
-        `.trim(),
-      });
-    }
-
     if (status === "delivered") {
       let pdfBuffer = await generateOrderPdfBuffer(existingOrder);
       let base64Pdf = Buffer.from(pdfBuffer).toString("base64");
