@@ -297,6 +297,7 @@ export const generateOrderPdfBuffer = async (order) => {
                         ? new Date(order.statusDates.sent).toLocaleString(
                             "sk-SK",
                             {
+                              timeZone: "Europe/Bratislava",
                               day: "2-digit",
                               month: "2-digit",
                               year: "numeric",
@@ -451,3 +452,4 @@ process.on("SIGTERM", async () => {
   }
   process.exit(0);
 });
+

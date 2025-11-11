@@ -200,16 +200,17 @@ export const updateOrderStatus = async (id, status, date = null) => {
 
   try {
     if (status === "delivered") {
-      let pdfBuffer = await generateOrderPdfBuffer(existingOrder);
+      const freshOrder = await prisma.order.findUnique({ where: { id } });
+      let pdfBuffer = await generateOrderPdfBuffer(freshOrder);
       let base64Pdf = Buffer.from(pdfBuffer).toString("base64");
 
       await sendOrderEmail({
         to: existingOrder.receiverEmail,
-        subject: `Vaša objednávka ${existingOrder.deliveryNumber} bola doručená`,
+        subject: `Vaša objednávka ${freshOrder.deliveryNumber} bola doručená`,
         text: `
           Dobrý deň,
 
-          Vaša objednávka s číslom ${existingOrder.deliveryNumber}
+          Vaša objednávka s číslom ${freshOrder.deliveryNumber}
           bola úspešne doručená dňa ${
             updateTime.toLocaleDateString("sk-SK") || "-"
           }.
@@ -218,7 +219,7 @@ export const updateOrderStatus = async (id, status, date = null) => {
         `.trim(),
         attachments: [
           {
-            filename: `objednavka-${existingOrder.deliveryNumber}.pdf`,
+            filename: `objednavka-${freshOrder.deliveryNumber}.pdf`,
             content: base64Pdf,
           },
         ],
@@ -226,11 +227,11 @@ export const updateOrderStatus = async (id, status, date = null) => {
 
       await sendOrderEmail({
         to: newEmail,
-        subject: `Vaša objednávka ${existingOrder.deliveryNumber} bola doručená`,
+        subject: `Vaša objednávka ${freshOrder.deliveryNumber} bola doručená`,
         text: `
           Dobrý deň,
 
-          Vaša objednávka s číslom ${existingOrder.deliveryNumber}
+          Vaša objednávka s číslom ${freshOrder.deliveryNumber}
           bola úspešne doručená dňa ${
             updateTime.toLocaleDateString("sk-SK") || "-"
           }.
@@ -239,7 +240,7 @@ export const updateOrderStatus = async (id, status, date = null) => {
         `.trim(),
         attachments: [
           {
-            filename: `objednavka-${existingOrder.deliveryNumber}.pdf`,
+            filename: `objednavka-${freshOrder.deliveryNumber}.pdf`,
             content: base64Pdf,
           },
         ],
