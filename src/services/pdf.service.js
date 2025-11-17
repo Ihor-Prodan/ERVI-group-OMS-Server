@@ -356,10 +356,10 @@ export const generateOrderPdfBuffer = async (order) => {
                         <td>${order.receiverCountry || "-"}</td>
                       </tr>
                       <tr>
-                        <td>Tel: ${order.receiverPhone || "-"}</td>
+                        <td>Email: ${order.receiverEmail || "-"}</td>
                       </tr>
                       <tr>
-                        <td>Email: ${order.receiverEmail || "-"}</td>
+                        <td>Tel: ${order.receiverPhone || "-"}</td>
                       </tr>
                     </table>
                   </div>
@@ -452,4 +452,3 @@ process.on("SIGTERM", async () => {
   }
   process.exit(0);
 });
-

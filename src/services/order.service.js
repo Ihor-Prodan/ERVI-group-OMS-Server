@@ -1,7 +1,7 @@
 import { prisma } from "../config/db.js";
 import { v4 as uuidv4 } from "uuid";
 import { sendOrderEmail } from "../config/mail.js";
-import { generateOrderPdfBuffer } from "../services/pdf.service.js";
+// import { generateOrderPdfBuffer } from "../services/pdf.service.js";
 
 export const createOrder = async (payload) => {
   const requiredFields = [
@@ -53,7 +53,9 @@ export const createOrder = async (payload) => {
 
   const company = COMPANY_OPTIONS.find((c) => c.value === payload.company);
   const country = COUNTRY_OPTIONS.find((c) => c.value === payload.country);
-  const receiverCountry = COUNTRY_OPTIONS.find((c) => c.value === payload.receiverCountry);
+  const receiverCountry = COUNTRY_OPTIONS.find(
+    (c) => c.value === payload.receiverCountry
+  );
 
   const pickupDate =
     payload.pickupType === "asap"
@@ -103,11 +105,21 @@ export const createOrder = async (payload) => {
     },
   });
 
+  console.log("✅ New order created:", createdOrder.id);
+
   const order = await prisma.order.findUnique({
     where: { id: createdOrder.id },
   });
 
   try {
+    const formattedNow = now.toLocaleString("sk-SK", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
     await sendOrderEmail({
       to: process.env.USER_EMAIL,
       subject: `Nová objednávka - číslo ${order.deliveryNumber}`,
@@ -116,9 +128,11 @@ export const createOrder = async (payload) => {
         Bola prijatá nová objednávka číslo #${order.deliveryNumber}
         Prosím, skontrolujte jej detaily v systéme a pripravte ju na spracovanie.
         Zákazník: ${order.company || "Neznámy"}
-        Dátum vytvorenia: ${now.toLocaleDateString("sk-SK")}
+        Dátum vytvorenia: ${formattedNow}
         Podrobnosti nájdete po prihlásení do administrácie:
-        https://www.ervi-group.com/#/admin/new
+        https://www.ervi-group.com/#/admin/accepted
+
+        S pozdravom,
         Váš systém objednávok ERVI Group
       `.trim(),
     });
@@ -128,15 +142,12 @@ export const createOrder = async (payload) => {
       subject: `Vaša objednávka bola úspešne prijatá - číslo #${order.deliveryNumber}`,
       text: `
         Dobrý deň,
-
         Vaša objednávka číslo DL ${
           order.contractNumber
-        } bola úspešne prijatá dňa ${now.toLocaleDateString("sk-SK")}.
+        } bola úspešne prijatá dňa ${formattedNow}.
         Čoskoro vás budeme informovať o ďalšom stave objednávky.
-
         Sledovanie objednávky:
         https://www.ervi-group.com/#/tracking?number=${order.deliveryNumber}
-
         Tu môžete kedykoľvek skontrolovať aktuálny stav vašej objednávky pri pomoci čísla ${
           order.deliveryNumber
         }.
@@ -157,6 +168,8 @@ export const getAllOrders = async () => {
 };
 
 export const findOrderByTrackingNumber = async (trackN) => {
+  console.log("Searching for order with tracking number:", trackN);
+
   return await prisma.order.findFirst({ where: { deliveryNumber: trackN } });
 };
 
@@ -188,66 +201,73 @@ export const updateOrderStatus = async (id, status, date = null) => {
     },
   });
 
-  let newEmail = "";
-
-  if (existingOrder.company === "Miele spol. s.r.o. (CZ)") {
-    newEmail = "obchod@miele.cz";
-  } else if (existingOrder.company === "Miele s.r.o. (SK)") {
-    newEmail = "obchod@miele.sk";
-  } else {
-    newEmail = existingOrder.email;
-  }
+  console.log(`✅ Order ${id} status updated to ${status}`);
 
   try {
     if (status === "delivered") {
       const freshOrder = await prisma.order.findUnique({ where: { id } });
-      let pdfBuffer = await generateOrderPdfBuffer(freshOrder);
-      let base64Pdf = Buffer.from(pdfBuffer).toString("base64");
+      const deliveredDateRaw = freshOrder.statusDates.delivered;
+
+      const emailDeliveredDate = deliveredDateRaw
+        ? new Date(deliveredDateRaw).toLocaleString("sk-SK", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "-";
+
+      // let pdfBuffer = await generateOrderPdfBuffer(freshOrder);
+      // let base64Pdf = Buffer.from(pdfBuffer).toString("base64");
+
+      console.log("Generated PDF buffer for order:", freshOrder.id);
+      // console.log("PDF generation successful", pdfBuffer.length);
 
       await sendOrderEmail({
-        to: existingOrder.receiverEmail,
+        to: freshOrder.receiverEmail,
         subject: `Vaša objednávka ${freshOrder.deliveryNumber} bola doručená`,
         text: `
           Dobrý deň,
 
-          Vaša objednávka s číslom ${freshOrder.deliveryNumber}
-          bola úspešne doručená dňa ${
-            updateTime.toLocaleDateString("sk-SK") || "-"
-          }.
-          V prílohe nájdete dokument k objednávke vo formáte PDF.
+          Vaša objednávka s číslom ${freshOrder.deliveryNumber} a číslom DL ${
+            freshOrder.contractNumber
+          } bola úspešne doručená dňa ${emailDeliveredDate}.
 
+          S pozdravom,
+          ERVI Group
         `.trim(),
-        attachments: [
-          {
-            filename: `objednavka-${freshOrder.deliveryNumber}.pdf`,
-            content: base64Pdf,
-          },
-        ],
+        // attachments: [
+        //   {
+        //     filename: `objednavka-${freshOrder.deliveryNumber}.pdf`,
+        //     content: base64Pdf,
+        //   },
+        // ],
       });
 
       await sendOrderEmail({
-        to: newEmail,
+        to: freshOrder.email,
         subject: `Vaša objednávka ${freshOrder.deliveryNumber} bola doručená`,
         text: `
           Dobrý deň,
 
-          Vaša objednávka s číslom ${freshOrder.deliveryNumber}
-          bola úspešne doručená dňa ${
-            updateTime.toLocaleDateString("sk-SK") || "-"
-          }.
-          V prílohe nájdete dokument k objednávke vo formáte PDF.
+          Vaša objednávka s číslom ${freshOrder.deliveryNumber} a číslom DL ${
+            freshOrder.contractNumber
+          } bola úspešne doručená dňa ${emailDeliveredDate}.
 
+          S pozdravom,
+          ERVI Group
         `.trim(),
-        attachments: [
-          {
-            filename: `objednavka-${freshOrder.deliveryNumber}.pdf`,
-            content: base64Pdf,
-          },
-        ],
+        // attachments: [
+        //   {
+        //     filename: `objednavka-${freshOrder.deliveryNumber}.pdf`,
+        //     content: base64Pdf,
+        //   },
+        // ],
       });
 
-      pdfBuffer = null;
-      base64Pdf = null;
+      // pdfBuffer = null;
+      // base64Pdf = null;
     }
   } catch (err) {
     console.error("Chyba pri odosielaní e-mailu:", err);
@@ -257,5 +277,7 @@ export const updateOrderStatus = async (id, status, date = null) => {
 };
 
 export const deleteOrderById = async (id) => {
+  console.log(`Deleting order with ID: ${id}`);
+
   return await prisma.order.delete({ where: { id } });
 };
