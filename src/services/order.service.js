@@ -118,6 +118,8 @@ export const createOrder = async (payload) => {
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+      hour12: false,
+      timeZone: "Europe/Bratislava",
     });
 
     await sendOrderEmail({
@@ -142,15 +144,11 @@ export const createOrder = async (payload) => {
       subject: `Vaša objednávka bola úspešne prijatá - číslo #${order.deliveryNumber}`,
       text: `
         Dobrý deň,
-        Vaša objednávka číslo DL ${
-          order.contractNumber
-        } bola úspešne prijatá dňa ${formattedNow}.
+        Vaša objednávka číslo DL ${order.contractNumber} bola úspešne prijatá dňa ${formattedNow}.
         Čoskoro vás budeme informovať o ďalšom stave objednávky.
         Sledovanie objednávky:
         https://www.ervi-group.com/#/tracking?number=${order.deliveryNumber}
-        Tu môžete kedykoľvek skontrolovať aktuálny stav vašej objednávky pri pomoci čísla ${
-          order.deliveryNumber
-        }.
+        Tu môžete kedykoľvek skontrolovať aktuálny stav vašej objednávky pri pomoci čísla ${order.deliveryNumber}.
 
         S pozdravom,
         ERVI Group
@@ -215,13 +213,15 @@ export const updateOrderStatus = async (id, status, date = null) => {
             year: "numeric",
             hour: "2-digit",
             minute: "2-digit",
+            hour12: false,
+            timeZone: "Europe/Bratislava",
           })
         : "-";
 
       // let pdfBuffer = await generateOrderPdfBuffer(freshOrder);
       // let base64Pdf = Buffer.from(pdfBuffer).toString("base64");
 
-      console.log("Generated PDF buffer for order:", freshOrder.id);
+      // console.log("Generated PDF buffer for order:", freshOrder.id);
       // console.log("PDF generation successful", pdfBuffer.length);
 
       await sendOrderEmail({
@@ -230,9 +230,7 @@ export const updateOrderStatus = async (id, status, date = null) => {
         text: `
           Dobrý deň,
 
-          Vaša objednávka s číslom ${freshOrder.deliveryNumber} a číslom DL ${
-            freshOrder.contractNumber
-          } bola úspešne doručená dňa ${emailDeliveredDate}.
+          Vaša objednávka s číslom ${freshOrder.deliveryNumber} a číslom DL ${freshOrder.contractNumber} bola úspešne doručená dňa ${emailDeliveredDate}.
 
           S pozdravom,
           ERVI Group
@@ -251,9 +249,7 @@ export const updateOrderStatus = async (id, status, date = null) => {
         text: `
           Dobrý deň,
 
-          Vaša objednávka s číslom ${freshOrder.deliveryNumber} a číslom DL ${
-            freshOrder.contractNumber
-          } bola úspešne doručená dňa ${emailDeliveredDate}.
+          Vaša objednávka s číslom ${freshOrder.deliveryNumber} a číslom DL ${freshOrder.contractNumber} bola úspešne doručená dňa ${emailDeliveredDate}.
 
           S pozdravom,
           ERVI Group
