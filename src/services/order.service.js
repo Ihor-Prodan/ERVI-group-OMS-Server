@@ -1,6 +1,8 @@
 import { prisma } from "../config/db.js";
 import { v4 as uuidv4 } from "uuid";
 import { sendOrderEmail } from "../config/mail.js";
+// import { checkTimeslotAvailability } from "./timeslotUtil.js";
+import { AppError } from "../utils/appErrors.js";
 // import { generateOrderPdfBuffer } from "../services/pdf.service.js";
 
 export const createOrder = async (payload) => {
@@ -23,7 +25,10 @@ export const createOrder = async (payload) => {
   });
 
   if (missingFields.length > 0) {
-    throw new Error(`Chýbajú tieto povinné polia: ${missingFields.join(", ")}`);
+    throw new AppError(
+      `Chýbajú tieto povinné polia: ${missingFields.join(", ")}`,
+      400
+    );
   }
 
   const now = new Date();
@@ -32,6 +37,7 @@ export const createOrder = async (payload) => {
     const lastOrder = await prisma.order.findFirst({
       orderBy: { deliveryNumber: "desc" },
     });
+
     const nextNumber = lastOrder
       ? parseInt(lastOrder.deliveryNumber, 10) + 1
       : 1;
@@ -106,6 +112,7 @@ export const createOrder = async (payload) => {
   });
 
   console.log("✅ New order created:", createdOrder.id);
+  console.log("✅", payload);
 
   const order = await prisma.order.findUnique({
     where: { id: createdOrder.id },
@@ -127,6 +134,7 @@ export const createOrder = async (payload) => {
       subject: `Nová objednávka - číslo ${order.deliveryNumber}`,
       text: `
         Dobrý deň,
+
         Bola prijatá nová objednávka číslo #${order.deliveryNumber}
         Prosím, skontrolujte jej detaily v systéme a pripravte ju na spracovanie.
         Zákazník: ${order.company || "Neznámy"}
@@ -144,11 +152,13 @@ export const createOrder = async (payload) => {
       subject: `Vaša objednávka bola úspešne prijatá - číslo #${order.deliveryNumber}`,
       text: `
         Dobrý deň,
+
         Vaša objednávka číslo DL ${order.contractNumber} bola úspešne prijatá dňa ${formattedNow}.
         Čoskoro vás budeme informovať o ďalšom stave objednávky.
         Sledovanie objednávky:
-        https://www.ervi-group.com/#/tracking?number=${order.deliveryNumber}
-        Tu môžete kedykoľvek skontrolovať aktuálny stav vašej objednávky pri pomoci čísla ${order.deliveryNumber}.
+        https://www.ervi-group.com/#/tracking?number=${order.contractNumber}
+        Tu môžete kedykoľvek skontrolovať aktuálny stav vašej objednávky pri pomoci čísla DL ${order.contractNumber}.
+        (Ak máte viacero čísel DL, zadajte všetky čísla.)
 
         S pozdravom,
         ERVI Group
@@ -165,11 +175,24 @@ export const getAllOrders = async () => {
   return await prisma.order.findMany({ orderBy: { date: "desc" } });
 };
 
-export const findOrderByTrackingNumber = async (trackN) => {
-  console.log("Searching for order with tracking number:", trackN);
+export const findOrderByTrackingNumber = async (input) => {
+  const number = input.trim();
 
-  return await prisma.order.findFirst({ where: { deliveryNumber: trackN } });
+  return await prisma.order.findFirst({
+    where: {
+      contractNumber: {
+        equals: number,
+        mode: "insensitive",
+      },
+    },
+  });
 };
+
+// export const findOrderByTrackingNumber = async (trackN) => {
+//   console.log("Searching for order with tracking number:", trackN);
+
+//   return await prisma.order.findFirst({ where: { deliveryNumber: trackN } });
+// };
 
 export const findOrderById = async (id) => {
   return await prisma.order.findUnique({ where: { id } });
@@ -276,4 +299,66 @@ export const deleteOrderById = async (id) => {
   console.log(`Deleting order with ID: ${id}`);
 
   return await prisma.order.delete({ where: { id } });
+};
+
+export const getAvailableTimeslots = async (companyId, date) => {
+  if (!companyId || !date) {
+    throw new Error("Spoločnosť a dátum sú povinné");
+  }
+
+  const COMPANY_OPTIONS = [
+    { value: "1", label: "Miele s.r.o. (SK)" },
+    { value: "5", label: "Miele spol. s.r.o. (CZ)" },
+    { value: "2", label: "em-shop.sk" },
+    { value: "3", label: "P & P Stanek s.r.o." },
+    { value: "6", label: "Ine..." },
+  ];
+
+  const TIME_SLOTS = [
+    { from: 9, to: 11 },
+    { from: 11, to: 13 },
+    { from: 13, to: 15 },
+    { from: 15, to: 17 },
+  ];
+
+  const companyLabel = COMPANY_OPTIONS.find(
+    (c) => c.value === companyId
+  )?.label;
+
+  if (!companyLabel) throw new Error("Neznáma spoločnosť");
+
+  const dayStart = new Date(date);
+
+  if (isNaN(dayStart.getTime())) throw new Error("Neplatný dátum");
+
+  dayStart.setHours(0, 0, 0, 0);
+
+  const dayEnd = new Date(date);
+  dayEnd.setHours(23, 59, 59, 999);
+
+  const existingOrders = await prisma.order.findMany({
+    where: {
+      company: companyLabel,
+      pickupDate: {
+        gte: dayStart,
+        lt: dayEnd,
+      },
+    },
+  });
+
+  const takenSlots = existingOrders
+    .map((order) => {
+      const hour = order.pickupDate.getHours();
+      return TIME_SLOTS.find((slot) => hour >= slot.from && hour < slot.to);
+    })
+    .filter(Boolean);
+
+  const availableSlots = TIME_SLOTS.filter(
+    (slot) =>
+      !takenSlots.some(
+        (taken) => taken.from === slot.from && taken.to === slot.to
+      )
+  );
+
+  return availableSlots;
 };

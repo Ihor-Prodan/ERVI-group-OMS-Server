@@ -5,6 +5,7 @@ import { requireAuth } from "../middleware/auth.middleware.js";
 const router = Router();
 
 router.post("/", orderCtrl.createOrder);
+router.get("/timeslots", orderCtrl.fetchTimeslots);
 router.get("/:id", orderCtrl.getOrder);
 
 router.get("/", requireAuth, orderCtrl.getOrders);

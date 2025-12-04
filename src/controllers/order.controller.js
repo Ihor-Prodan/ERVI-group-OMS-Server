@@ -1,5 +1,6 @@
 import * as orderService from "../services/order.service.js";
 import { generateOrderPdfBuffer } from "../services/pdf.service.js";
+import { getAvailableTimeslots } from "../services/order.service.js";
 
 export const createOrder = async (req, res) => {
   try {
@@ -13,7 +14,7 @@ export const createOrder = async (req, res) => {
     });
   } catch (err) {
     console.error("Failed to create order:", err);
-    res.status(500).json({ message: "Nepodarilo sa vytvoriť objednávku" });
+    res.status(500).json({ message: err.message || "Nepodarilo sa vytvoriť objednávku" });
   }
 };
 
@@ -40,7 +41,7 @@ export const getOrder = async (req, res) => {
 
     const responseData = {
       id: order.id,
-      deliveryNumber: order.deliveryNumber,
+      deliveryNumber: order.contractNumber,
       fullname: order.fullname,
       company: order.company,
       from: order.from,
@@ -103,3 +104,23 @@ export const generateDoc = async (req, res) => {
     res.status(500).json({ message: "Failed to generate document" });
   }
 };
+
+export const fetchTimeslots = async (req, res) => {
+  try {
+    const { company, date } = req.query;
+
+    console.log("Fetching timeslots for company:", company, "on date:", date);
+
+    if (!company || !date) {
+      return res.status(400).json({ message: "Spoločnosť a dátum sú povinné" });
+    }
+
+    const availableSlots = await getAvailableTimeslots(company, date);
+
+    res.json({ availableSlots });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Nepodarilo sa načítať dostupné časové pásma" });
+  }
+};
+
