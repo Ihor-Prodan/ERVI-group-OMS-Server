@@ -1,7 +1,6 @@
 import { prisma } from "../config/db.js";
 import { v4 as uuidv4 } from "uuid";
 import { sendOrderEmail } from "../config/mail.js";
-// import { checkTimeslotAvailability } from "./timeslotUtil.js";
 import { AppError } from "../utils/appErrors.js";
 // import { generateOrderPdfBuffer } from "../services/pdf.service.js";
 
@@ -112,7 +111,6 @@ export const createOrder = async (payload) => {
   });
 
   console.log("✅ New order created:", createdOrder.id);
-  console.log("✅", payload);
 
   const order = await prisma.order.findUnique({
     where: { id: createdOrder.id },
@@ -321,24 +319,26 @@ export const getAvailableTimeslots = async (companyId, date) => {
     { from: 15, to: 17 },
   ];
 
-  const companyLabel = COMPANY_OPTIONS.find(
-    (c) => c.value === companyId
-  )?.label;
-
-  if (!companyLabel) throw new Error("Neznáma spoločnosť");
+  const companyLabel = COMPANY_OPTIONS.find((c) => c.value === companyId)?.label;
+  if (!companyLabel) {
+    throw new Error("Neznáma spoločnosť");
+  }
 
   const dayStart = new Date(date);
-
-  if (isNaN(dayStart.getTime())) throw new Error("Neplatný dátum");
-
+  if (isNaN(dayStart.getTime())) {
+    throw new Error("Neplatný dátum");
+  }
   dayStart.setHours(0, 0, 0, 0);
 
   const dayEnd = new Date(date);
   dayEnd.setHours(23, 59, 59, 999);
 
+  const ACTIVE_STATUSES = ["accepted", "paid", "sent"];
+
   const existingOrders = await prisma.order.findMany({
     where: {
       company: companyLabel,
+      status: { in: ACTIVE_STATUSES },
       pickupDate: {
         gte: dayStart,
         lt: dayEnd,
@@ -348,17 +348,15 @@ export const getAvailableTimeslots = async (companyId, date) => {
 
   const takenSlots = existingOrders
     .map((order) => {
-      const hour = order.pickupDate.getHours();
+      const hour = new Date(order.pickupDate).getHours();
       return TIME_SLOTS.find((slot) => hour >= slot.from && hour < slot.to);
     })
     .filter(Boolean);
 
-  const availableSlots = TIME_SLOTS.filter(
+  return TIME_SLOTS.filter(
     (slot) =>
       !takenSlots.some(
         (taken) => taken.from === slot.from && taken.to === slot.to
       )
   );
-
-  return availableSlots;
 };
