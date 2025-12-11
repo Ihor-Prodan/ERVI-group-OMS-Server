@@ -6,6 +6,7 @@ export const sendOrderEmail = async ({
   to,
   subject,
   text,
+  html,
   attachments = [],
 }) => {
 
@@ -15,6 +16,7 @@ export const sendOrderEmail = async ({
       to,
       subject,
       text,
+      html,
       attachments,
     });
 

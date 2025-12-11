@@ -86,6 +86,7 @@ export const generateDoc = async (req, res) => {
   const { id } = req.params;
 
   const order = await orderService.findOrderById(id);
+  console.log("Generating document for order:", order.deliveryNumber);
 
   if (!order) return res.status(404).json({ message: "Order not found" });
 

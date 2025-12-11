@@ -246,7 +246,7 @@ export const updateOrderStatus = async (id, status, date = null) => {
       // console.log("PDF generation successful", pdfBuffer.length);
 
       await sendOrderEmail({
-        to: freshOrder.receiverEmail,
+        to: freshOrder.email,
         subject: `Vaša objednávka ${freshOrder.deliveryNumber} bola doručená`,
         text: `
           Dobrý deň,
@@ -265,23 +265,88 @@ export const updateOrderStatus = async (id, status, date = null) => {
       });
 
       await sendOrderEmail({
-        to: freshOrder.email,
+        to: freshOrder.receiverEmail,
         subject: `Vaša objednávka ${freshOrder.deliveryNumber} bola doručená`,
-        text: `
-          Dobrý deň,
+        // text: `
+        //   Dobrý deň,
 
-          Vaša objednávka s číslom ${freshOrder.deliveryNumber} a číslom DL ${freshOrder.contractNumber} bola úspešne doručená dňa ${emailDeliveredDate}.
+        //   Vaša objednávka s číslom ${freshOrder.deliveryNumber} a číslom DL ${freshOrder.contractNumber} bola úspešne doručená dňa ${emailDeliveredDate}.
 
-          S pozdravom,
-          ERVI Group
-        `.trim(),
-        // attachments: [
-        //   {
-        //     filename: `objednavka-${freshOrder.deliveryNumber}.pdf`,
-        //     content: base64Pdf,
-        //   },
-        // ],
+        //   S pozdravom,
+        //   ERVI Group
+        // `.trim(),
+        html: `
+          <div style="font-family: Arial, sans-serif; color: #000; line-height: 1.5; font-size: 15px;">
+            <p>Vážený zákazník,</p>
+
+            <p>
+              Dnes bola doručená vaša objednávka od spoločnosti <strong>${freshOrder.company}</strong>.
+            </p>
+
+            <h2 style="font-size: 20px; margin-top: 25px;">Objednávka</h2>
+
+            <p><strong>Číslo objednávky:</strong> ${freshOrder.contractNumber}</p>
+            <p><strong>Referenčné číslo:</strong> ${freshOrder.deliveryNumber}</p>
+            <p>
+              <strong>Dodacia adresa:</strong><br>
+              ${freshOrder.receiverStreet}, ${freshOrder.receiverPsc} ${freshOrder.receiverCity}, ${freshOrder.receiverCountry}
+            </p>
+
+            <h2 style="font-size: 20px; margin-top: 30px;">Doručenie</h2>
+
+            <p>
+              Pre bližšie informácie o doručení tejto zásielky použite odkaz:<br>
+              <a href="https://www.ervi-group.com/#/tracking?number=${freshOrder.contractNumber}" target="_blank">www.ervi-group.com</a>
+            </p>
+
+            <p>
+              Prevádzkovateľom je spoločnosť <strong>ERVI Group, s.r.o.</strong>, IČO: 56 829 175 (ďalej len ako Prevádzkovateľ).
+            </p>
+
+            <p>
+              Vaše osobné údaje spracúva Prevádzkovateľ za účelom zabezpečenia doručenia zásielky.
+              Prevádzkovateľa môžete kontaktovať na adrese:<br>
+              Doležalova 3424/15C, 821 04 Bratislava.
+            </p>
+
+            <p>
+              Budeme radi, ak nám dáte vedieť, či všetko prebehlo podľa vašich predstáv.
+              Vaša spätná väzba nám pomáha zlepšovať naše služby.
+            </p>
+
+            <p>
+              <a href="https://maps.app.goo.gl/zsAWqC4MpnJDc5Ee6?g_st=ipc" target="_blank">
+                Otvoriť v Mapách
+              </a>
+            </p>
+
+            <p>S pozdravom,<br>preprávna spoločnosť ERVI Group.</p>
+
+            <p style="font-size: 12px; color: #777; margin-top: 40px;">
+              Táto správa je generovaná automaticky. Prosím, neodpovedajte na ňu.
+            </p>
+          </div>
+        `,
       });
+
+      // await sendOrderEmail({
+      //   to: freshOrder.email,
+      //   subject: `Vaša objednávka ${freshOrder.deliveryNumber} bola doručená`,
+      //   text: `
+      //     Dobrý deň,
+
+      //     Vaša objednávka s číslom ${freshOrder.deliveryNumber} a číslom DL ${freshOrder.contractNumber} bola úspešne doručená dňa ${emailDeliveredDate}.
+
+      //     S pozdravom,
+      //     ERVI Group
+      //   `.trim(),
+      //   // attachments: [
+      //   //   {
+      //   //     filename: `objednavka-${freshOrder.deliveryNumber}.pdf`,
+      //   //     content: base64Pdf,
+      //   //   },
+      //   // ],
+      // });
 
       // pdfBuffer = null;
       // base64Pdf = null;
@@ -319,7 +384,9 @@ export const getAvailableTimeslots = async (companyId, date) => {
     { from: 15, to: 17 },
   ];
 
-  const companyLabel = COMPANY_OPTIONS.find((c) => c.value === companyId)?.label;
+  const companyLabel = COMPANY_OPTIONS.find(
+    (c) => c.value === companyId
+  )?.label;
   if (!companyLabel) {
     throw new Error("Neznáma spoločnosť");
   }
