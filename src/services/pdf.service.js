@@ -1,6 +1,21 @@
 import puppeteer from "puppeteer";
 
 let browser;
+let idleTimer = null;
+
+const IDLE_TIMEOUT = 15 * 60 * 1000; // 15 min
+
+const resetIdleTimer = () => {
+  if (idleTimer) clearTimeout(idleTimer);
+
+  idleTimer = setTimeout(async () => {
+    if (browser) {
+      await browser.close();
+      browser = null;
+      console.log("🧹 Browser closed due to inactivity");
+    }
+  }, IDLE_TIMEOUT);
+};
 
 const getBrowser = async () => {
   if (!browser) {
@@ -9,6 +24,8 @@ const getBrowser = async () => {
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
   }
+
+  resetIdleTimer();
   return browser;
 };
 
