@@ -44,6 +44,17 @@ export const generateOrderPdfBuffer = async (order) => {
                 margin-bottom: 10px;
               }
 
+              .logo {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+              }
+
+              .po {
+                padding: 5px;
+                border: 2px solid #000;
+              }
+
               .logo svg {
                 width: 120px;
                 height: auto;
@@ -266,11 +277,17 @@ export const generateOrderPdfBuffer = async (order) => {
                       />
                       </g>
                     </svg>
+
+                    ${order.company === "Miele spol. s.r.o. (CZ)"
+                      ? '<div class="po">PO: 4522621163</div>'
+                      : ''
+                    }
+                    
                   </div>
                   <div class="doc-info">
                     <div>
                       <strong>Dátum dodania:</strong> ${new Date(
-                        order.date
+                        order.date,
                       ).toLocaleDateString("sk-SK")}
                     </div>
                       <div><strong>Číslo zásielky:</strong> ${
@@ -303,7 +320,7 @@ export const generateOrderPdfBuffer = async (order) => {
                               year: "numeric",
                               hour: "2-digit",
                               minute: "2-digit",
-                            }
+                            },
                           )
                         : "-"
                     }
@@ -349,8 +366,8 @@ export const generateOrderPdfBuffer = async (order) => {
                       </tr>
                       <tr>
                         <td>${order.receiverPsc || "-"} ${
-        order.receiverCity || "-"
-      }</td>
+                          order.receiverCity || "-"
+                        }</td>
                       </tr>
                       <tr>
                         <td>${order.receiverCountry || "-"}</td>
@@ -392,7 +409,7 @@ export const generateOrderPdfBuffer = async (order) => {
                         <td>${p.unit || "ks"}</td>
                         <td>${typeof p === "string" ? p : p.name}</td>
                       </tr>
-                    `
+                    `,
                         )
                         .join("")}
                     </tbody>
@@ -402,7 +419,7 @@ export const generateOrderPdfBuffer = async (order) => {
                      order.services?.length
                        ? `
                   <div class="services"><strong>Služby:</strong> ${order.services.join(
-                    ", "
+                    ", ",
                   )}</div>
                   `
                        : ""
@@ -430,7 +447,7 @@ export const generateOrderPdfBuffer = async (order) => {
         </body>
       </html>
     `,
-      { waitUntil: "networkidle0" }
+      { waitUntil: "networkidle0" },
     );
 
     const pdfBuffer = await page.pdf({
@@ -448,6 +465,7 @@ export const generateOrderPdfBuffer = async (order) => {
 process.on("SIGTERM", async () => {
   if (browser) {
     await browser.close();
+
     console.log("🧹 Puppeteer browser closed on shutdown");
   }
   process.exit(0);
