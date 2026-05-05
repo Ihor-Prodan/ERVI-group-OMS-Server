@@ -306,7 +306,7 @@ export const updateOrderStatus = async (id, status, date = null) => {
             <p>
               Vaše osobné údaje spracúva Prevádzkovateľ za účelom zabezpečenia doručenia zásielky.
               Prevádzkovateľa môžete kontaktovať na adrese:<br>
-              Doležalova 3424/15C, 821 04 Bratislava.
+              Trnavská cesta 18263/112A, 821 01 Bratislava.
             </p>
 
             <p>

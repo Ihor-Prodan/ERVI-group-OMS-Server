@@ -454,7 +454,7 @@ export const generateOrderPdfBuffer = async (order) => {
             <div class="footer">
               <div class="footer-rectangle"></div>
               <div>
-                <strong>ERVI Group s.r.o.</strong> &nbsp; Doležalova 3424/15C, 821 04 Bratislava
+                <strong>ERVI Group s.r.o.</strong> &nbsp; Trnavská cesta 18263/112A, 821 01 Bratislava
                 &nbsp;|&nbsp; <br />Tel. +421 911 640 665 &nbsp;|&nbsp; info@ervi-group.com &nbsp;|&nbsp;
                 <a href="http://www.ervi-group.com">www.ervi-group.com</a><br />
                 IČO: 56829175 &nbsp;|&nbsp; IČ DPH: SK2122463442 &nbsp;|&nbsp; OR MS Bratislava, oddiel
