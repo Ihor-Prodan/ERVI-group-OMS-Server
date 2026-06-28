@@ -15,7 +15,7 @@ export const createDocument = async (data) => {
       fileType: data.fileType ?? null,
       sumWithDph: Number(data.sumWithDph),
       sumWithoutDph: Number(data.sumWithoutDph),
-      dphRate: data.dphRate !== undefined ? Number(data.dphRate) : 20,
+      dphRate: data.dphRate !== undefined ? Number(data.dphRate) : 23,
       date: new Date(data.date),
       dueDate: data.dueDate ? new Date(data.dueDate) : null,
       isPaid: data.isPaid ?? false,
