@@ -2,6 +2,7 @@ import { prisma } from "../config/db.js";
 import { v4 as uuidv4 } from "uuid";
 import { sendOrderEmail } from "../config/mail.js";
 import { AppError } from "../utils/appErrors.js";
+import { escapeHtml } from "../utils/escapeHtml.js";
 // import { generateOrderPdfBuffer } from "../services/pdf.service.js";
 
 export const createOrder = async (payload) => {
@@ -280,23 +281,23 @@ export const updateOrderStatus = async (id, status, date = null) => {
             <p>Vážený zákazník,</p>
 
             <p>
-              Dnes bola doručená vaša objednávka od spoločnosti <strong>${freshOrder.company}</strong>.
+              Dnes bola doručená vaša objednávka od spoločnosti <strong>${escapeHtml(freshOrder.company)}</strong>.
             </p>
 
             <h2 style="font-size: 20px; margin-top: 25px;">Objednávka</h2>
 
-            <p><strong>Číslo objednávky:</strong> ${freshOrder.contractNumber}</p>
-            <p><strong>Referenčné číslo:</strong> ${freshOrder.deliveryNumber}</p>
+            <p><strong>Číslo objednávky:</strong> ${escapeHtml(freshOrder.contractNumber)}</p>
+            <p><strong>Referenčné číslo:</strong> ${escapeHtml(freshOrder.deliveryNumber)}</p>
             <p>
               <strong>Dodacia adresa:</strong><br>
-              ${freshOrder.receiverStreet}, ${freshOrder.receiverPsc} ${freshOrder.receiverCity}, ${freshOrder.receiverCountry}
+              ${escapeHtml(freshOrder.receiverStreet)}, ${escapeHtml(freshOrder.receiverPsc)} ${escapeHtml(freshOrder.receiverCity)}, ${escapeHtml(freshOrder.receiverCountry)}
             </p>
 
             <h2 style="font-size: 20px; margin-top: 30px;">Doručenie</h2>
 
             <p>
               Pre bližšie informácie o doručení tejto zásielky použite odkaz:<br>
-              <a href="https://www.ervi-group.com/#/tracking?number=${freshOrder.contractNumber}" target="_blank">www.ervi-group.com</a>
+              <a href="https://www.ervi-group.com/#/tracking?number=${encodeURIComponent(freshOrder.contractNumber)}" target="_blank">www.ervi-group.com</a>
             </p>
 
             <p>

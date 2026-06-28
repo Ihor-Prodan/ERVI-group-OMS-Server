@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Document" ADD COLUMN     "dphRate" INTEGER NOT NULL DEFAULT 20;

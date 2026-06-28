@@ -4,9 +4,11 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
+import cron from 'node-cron';
 import routes from './routes/index.js';
 import { errorHandler } from './middleware/error.middleware.js';
 import { initUser } from './services/auth.service.js';
+import { deleteDeliveredOldOrders } from './services/cleanup.service.js';
 
 dotenv.config();
 const app = express();
@@ -38,5 +40,12 @@ const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
 initUser().then(() => {
   app.listen(PORT, () => {
     console.log(`✅ Server running on http://localhost:${PORT}`);
+  });
+
+  // Daily at 03:47 — delete orders delivered more than 3 months ago
+  cron.schedule('47 3 * * *', () => {
+    deleteDeliveredOldOrders().catch((err) =>
+      console.error('[cleanup] Error:', err)
+    );
   });
 });

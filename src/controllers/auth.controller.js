@@ -5,6 +5,7 @@ import {
   verifyRefreshToken,
 } from "../utils/jwt.js";
 import { COOKIE_NAME } from "../config/jwt.js";
+import { CSRF_COOKIE_NAME, generateCsrfToken } from "../utils/csrf.js";
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -28,8 +29,8 @@ export const login = async (req, res) => {
   res.cookie(COOKIE_NAME, accessToken, {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? "none" : 'lax',
-    domain: ".ervi-group.com",
+    sameSite: "lax",
+    ...(isProd && { domain: ".ervi-group.com" }),
     path: "/",
     maxAge: 1000 * 60 * 60 * 2,
   });
@@ -37,10 +38,19 @@ export const login = async (req, res) => {
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? "none" : 'lax',
-    domain: ".ervi-group.com",
+    sameSite: "lax",
+    ...(isProd && { domain: ".ervi-group.com" }),
     path: "/",
     maxAge: 1000 * 60 * 60 * 24 * 3,
+  });
+
+  res.cookie(CSRF_COOKIE_NAME, generateCsrfToken(), {
+    httpOnly: false,
+    secure: isProd,
+    sameSite: "lax",
+    ...(isProd && { domain: ".ervi-group.com" }),
+    path: "/",
+    maxAge: 1000 * 60 * 60 * 2,
   });
 
   res.json({
@@ -67,8 +77,8 @@ export const refresh = async (req, res) => {
   res.cookie(COOKIE_NAME, newAccessToken, {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? "none" : 'lax',
-    domain: ".ervi-group.com",
+    sameSite: "lax",
+    ...(isProd && { domain: ".ervi-group.com" }),
     path: "/",
     maxAge: 1000 * 60 * 60 * 2,
   });
@@ -76,10 +86,19 @@ export const refresh = async (req, res) => {
   res.cookie("refreshToken", newRefreshToken, {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? "none" : 'lax',
-    domain: ".ervi-group.com",
+    sameSite: "lax",
+    ...(isProd && { domain: ".ervi-group.com" }),
     path: "/",
     maxAge: 1000 * 60 * 60 * 24 * 3,
+  });
+
+  res.cookie(CSRF_COOKIE_NAME, generateCsrfToken(), {
+    httpOnly: false,
+    secure: isProd,
+    sameSite: "lax",
+    ...(isProd && { domain: ".ervi-group.com" }),
+    path: "/",
+    maxAge: 1000 * 60 * 60 * 2,
   });
 
   res.json({ ok: true });
@@ -89,13 +108,14 @@ export const logout = (req, res) => {
   const cookieOptions = {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? "none" : 'lax',
+    sameSite: "lax",
     path: "/",
-    domain: ".ervi-group.com",
+    ...(isProd && { domain: ".ervi-group.com" }),
   };
 
   res.clearCookie(COOKIE_NAME, cookieOptions);
   res.clearCookie("refreshToken", cookieOptions);
+  res.clearCookie(CSRF_COOKIE_NAME, { ...cookieOptions, httpOnly: false });
 
   res.json({ ok: true });
 };
